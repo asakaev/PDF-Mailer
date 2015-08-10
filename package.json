@@ -1,0 +1,21 @@
+{
+  "name": "PDF-Mailer",
+  "version": "0.0.1",
+  "description": "Web App to recieve HTML, generate PDF and email that.",
+
+  "license": "MIT",
+  "private": true,
+
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tematema/PDF-Mailer"
+  },
+
+  "dependencies": {
+    "nodemailer": "*"
+  },
+
+  "scripts": {
+    "start": "node app.js"
+  }
+}
