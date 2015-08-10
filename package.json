@@ -12,7 +12,8 @@
   },
 
   "dependencies": {
-    "nodemailer": "*"
+    "nodemailer": "*",
+    "moment": "*"
   },
 
   "scripts": {
