@@ -4,14 +4,15 @@ var PDF = require('pdfkit');
 var nodemailer = require('nodemailer');
 var url = require('url');
 var queryString = require('querystring');
+var config = require('./config.json');
 
 var count = 0;
 
 var transporter = nodemailer.createTransport({
   service: 'Gmail',
   auth: {
-    user: '',
-    pass: ''
+    user: config.gmail.user,
+    pass: config.gmail.pass
   }
 });
 
@@ -38,10 +39,12 @@ http.createServer(function (req, res) {
   doc.text(text, 100, 100);
   doc.end(); //we end the document writing.
 
+  var email = params.email || config.to;
+
   var mailOptions = {
-    from: 'Mail Tester <email@email.com>',
-    to: '', // list of receivers
-    subject: 'Test subject',
+    from: config.from,
+    to: email, // list of receivers
+    subject: config.subject,
     text: 'Hello, here will be mail body.', // plaintext body
     attachments: [
       {
