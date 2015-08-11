@@ -25,6 +25,7 @@ http.createServer(function (req, res) {
   var agent = req.headers["user-agent"];
   console.log((++count).toString(), ip, getTime(), req.method, req.url, agent);
   var params = getParams(req.url);
+  console.log((count).toString(), ip, getTime(), JSON.stringify(params));
 
   handleRequest(res, params, ip);
 }).listen(config.port, config.host);
@@ -96,13 +97,17 @@ var handleRequest = function(res, params, ip) {
   };
 
   transporter.sendMail(mailOptions, function(error, info) {
+    var result;
+
     if (error) {
-      console.log(error);
+      console.log('ERROR:', (count).toString(), ip, getTime(), error);
+      result = JSON.stringify({ status: 'fail' });
+    } else {
+      console.log((count).toString(), ip, getTime(), info.response);
+      result = JSON.stringify({ status: 'ok' });
     }
 
-    console.log((count).toString(), ip, getTime(), info.response);
-
-    res.writeHead(200, {'Content-Type': 'plain/text'});
-    res.end('done!');
+    res.writeHead(200, {'Content-Type': 'application/json'});
+    res.end(result);
   });
 };
