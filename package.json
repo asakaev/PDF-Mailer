@@ -13,7 +13,8 @@
 
   "dependencies": {
     "nodemailer": "*",
-    "moment": "*"
+    "moment": "*",
+    "pdfkit": "*"
   },
 
   "scripts": {
