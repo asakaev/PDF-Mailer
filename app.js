@@ -53,6 +53,8 @@ http.createServer(function (req, res) {
   var params = getParams(req.url);
   console.log((count).toString(), ip, getTime(), JSON.stringify(params));
 
+  res.setHeader('Access-Control-Allow-Origin', '*');
+
   if (req.method != 'POST') {
     res.writeHead(200, "OK", {'Content-Type': 'text/plain'});
     res.end('not post');
