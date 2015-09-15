@@ -1,0 +1,13 @@
+{
+  "host": "127.0.0.1",
+  "port": "1337",
+
+  "gmail" : {
+    "user": "your@email.com",
+    "pass": ""
+  },
+
+  "from": "Mail Tester <your@email.com>",
+  "to": "somebody@email.com",
+  "subject": "Test subject"
+}
