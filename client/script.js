@@ -1,4 +1,4 @@
-(function () {
+(function() {
   /**
    * @namespace
    */
@@ -8,14 +8,13 @@
   /**
    * @type {string}
    */
-  pdfmailer.KEY = '42_newkey';
-
+  pdfmailer.UNIQUE_ID = '1c711fe53cd08eea5055337c8f9278b7';
 
   /**
    * Filter script tags
    *
-   * @param {!Object} html
-   * @returns {string}
+   * @param {!object} html
+   * @return {string}
    */
   pdfmailer.filter = function(html) {
     html.find('script').remove();
@@ -28,7 +27,7 @@
   /**
    *
    * @param {!string} email
-   * @returns {boolean}
+   * @return {boolean}
    */
   pdfmailer.isValidEmail = function(email) {
     return email.trim() !== '';
@@ -59,8 +58,8 @@
     $.ajax({
       url: url,
       type: 'POST',
-      beforeSend: function (xhr) {
-        xhr.setRequestHeader('Authorization', pdfmailer.KEY);
+      beforeSend: function(xhr) {
+        xhr.setRequestHeader('Authorization', pdfmailer.UNIQUE_ID);
         xhr.setRequestHeader('PDF-Email', email);
       },
       data: bodyHTML,

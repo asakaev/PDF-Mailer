@@ -20,20 +20,22 @@ var transporter = nodemailer.createTransport({
 
 /**
  * Parse HTTP POST request body
- * @param request
- * @param response
- * @param callback
- * @returns {null}
+ * @param {stream} request
+ * @param {stream} response
+ * @param {function} callback
+ * @return {null}
  */
 function processPost(request, response, callback) {
-  var queryData = "";
-  if(typeof callback !== 'function') return null;
+  var queryData = '';
+  if (typeof callback !== 'function') {
+    return null;
+  }
 
-  if(request.method == 'POST') {
+  if (request.method == 'POST') {
     request.on('data', function(data) {
       queryData += data;
-      if(queryData.length > 1e6) {
-        queryData = "";
+      if (queryData.length > 1e6) {
+        queryData = '';
         response.writeHead(413, {'Content-Type': 'text/plain'}).end();
         request.connection.destroy();
       }
@@ -51,9 +53,9 @@ function processPost(request, response, callback) {
 }
 
 
-http.createServer(function (req, res) {
+http.createServer(function(req, res) {
   var ip = req.connection.remoteAddress;
-  var agent = req.headers["user-agent"];
+  var agent = req.headers['user-agent'];
   console.log((++count).toString(), ip, getTime(), req.method, req.url, agent);
   var params = getParams(req.url);
   console.log((count).toString(), ip, getTime(), JSON.stringify(params));
@@ -85,7 +87,7 @@ http.createServer(function (req, res) {
     return res.end(result);
   }
 
-  processPost(req, res, function () {
+  processPost(req, res, function() {
     console.log(req.post);
 
     var key = req.headers['authorization'] || 'no_key';
@@ -96,8 +98,8 @@ http.createServer(function (req, res) {
 
 
 /**
- * Returns time in [11/08/15 18:08:61] format
- * @returns {string}
+ * Return time in [11/08/15 18:08:61] format
+ * @return {string}
  */
 var getTime = function() {
   return '[' + moment().format('DD/MM/YY HH:MM:SS') + ']';
@@ -107,7 +109,7 @@ var getTime = function() {
 /**
  * Parse querystring
  * @param {!string} url_string
- * @returns {Object}
+ * @return {Object}
  */
 var getParams = function(url_string) {
   var qs = url.parse(url_string).query;
@@ -118,7 +120,7 @@ var getParams = function(url_string) {
 /**
  * Prepare HTML from body DOM node
  * @param {!string} body
- * @returns {string}
+ * @return {string}
  */
 var prepareHTML = function(body) {
   var meta = '<meta charset="UTF-8" />';
@@ -144,12 +146,7 @@ var handleRequest = function(res, key, body, ip) {
     to: email, // list of receivers
     subject: config.subject,
     text: 'Hello, here will be mail body.', // plaintext body
-    attachments: [
-      {
-        filename: 'doc.pdf',
-        content: pdf
-      }
-    ]
+    attachments: [{filename: 'doc.pdf', content: pdf}]
   };
 
   transporter.sendMail(mailOptions, function(error, info) {
@@ -157,10 +154,16 @@ var handleRequest = function(res, key, body, ip) {
 
     if (error) {
       console.log('ERROR:', (count).toString(), ip, getTime(), error);
-      result = JSON.stringify({status: 'error', message: 'Failed to send email'});
+      result = JSON.stringify({
+        status: 'error',
+        message: 'Failed to send email'
+      });
     } else {
       console.log((count).toString(), ip, getTime(), info.response);
-      result = JSON.stringify({status: 'ok', message: 'Email send'});
+      result = JSON.stringify({
+        status: 'ok',
+        message: 'Email send'
+      });
     }
 
     res.writeHead(200, {'Content-Type': 'application/json'});
