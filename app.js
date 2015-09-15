@@ -59,28 +59,38 @@ http.createServer(function (req, res) {
   console.log((count).toString(), ip, getTime(), JSON.stringify(params));
 
   res.setHeader('Access-Control-Allow-Origin', config.origin);
-  res.setHeader('Access-Control-Allow-Methods', "POST");
-  res.setHeader('Access-Control-Allow-Headers', "Authorization");
+  res.setHeader('Access-Control-Allow-Methods', 'POST');
+  res.setHeader('Access-Control-Allow-Headers', 'Authorization, PDF-Email');
 
-  if (req.method != 'POST') {
-    res.writeHead(200, "OK", {'Content-Type': 'text/plain'});
-    res.end('not post');
-  } else {
-    processPost(req, res, function () {
-      console.log(req.post);
-      // Use request.post here
+  var email = req.headers['pdf-email'];
 
-      var key = req.headers['authorization'] || 'no_key';
-      handleRequest(res, key, req.post, ip);
+  var text;
+  var result;
 
-      //res.writeHead(200, "OK", {'Content-Type': 'text/plain'});
-      //res.end();
-    });
+  if (!email) {
+    text = 'Email is empty';
+    result = JSON.stringify({ status: 'error', message: text});
+    console.log(text);
+    res.writeHead(200, {'Content-Type': 'application/json'});
+    return res.end(result);
   }
 
-  // test
-  //res.writeHead(200, {'Content-Type': 'application/json'});
-  //return res.end('done');
+  console.log('email:', email);
+
+  if (req.method !== 'POST') {
+    text = 'POST method allowed only';
+    result = JSON.stringify({ status: 'error', message: text});
+    console.log(text);
+    res.writeHead(200, {'Content-Type': 'application/json'});
+    return res.end(result);
+  }
+
+  processPost(req, res, function () {
+    console.log(req.post);
+
+    var key = req.headers['authorization'] || 'no_key';
+    handleRequest(res, key, req.post, ip);
+  });
 
 }).listen(config.port, config.host);
 
@@ -147,10 +157,10 @@ var handleRequest = function(res, key, body, ip) {
 
     if (error) {
       console.log('ERROR:', (count).toString(), ip, getTime(), error);
-      result = JSON.stringify({ status: 'fail' });
+      result = JSON.stringify({status: 'error', message: 'Failed to send email'});
     } else {
       console.log((count).toString(), ip, getTime(), info.response);
-      result = JSON.stringify({ status: 'ok' });
+      result = JSON.stringify({status: 'ok', message: 'Email send'});
     }
 
     res.writeHead(200, {'Content-Type': 'application/json'});

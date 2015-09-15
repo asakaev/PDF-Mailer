@@ -6,14 +6,21 @@
 
 
   /**
+   * @type {string}
+   */
+  pdfmailer.KEY = '42_newkey';
+
+
+  /**
    * Filter script tags
    *
-   * @param {JQuery.node} html
+   * @param {!Object} html
    * @returns {string}
    */
   pdfmailer.filter = function(html) {
     html.find('script').remove();
     html.find(':button').remove();
+    html.find(':input').remove();
     return html.html();
   };
 
@@ -53,7 +60,8 @@
       url: url,
       type: 'POST',
       beforeSend: function (xhr) {
-        xhr.setRequestHeader('Authorization', 'key_42');
+        xhr.setRequestHeader('Authorization', pdfmailer.KEY);
+        xhr.setRequestHeader('PDF-Email', email);
       },
       data: bodyHTML,
       contentType: 'application/x-www-form-urlencoded',
