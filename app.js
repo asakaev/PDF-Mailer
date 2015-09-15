@@ -18,6 +18,13 @@ var transporter = nodemailer.createTransport({
 });
 
 
+/**
+ * Parse HTTP POST request body
+ * @param request
+ * @param response
+ * @param callback
+ * @returns {null}
+ */
 function processPost(request, response, callback) {
   var queryData = "";
   if(typeof callback !== 'function') return null;
@@ -42,8 +49,6 @@ function processPost(request, response, callback) {
     response.end();
   }
 }
-
-
 
 
 http.createServer(function (req, res) {
@@ -71,12 +76,9 @@ http.createServer(function (req, res) {
     });
   }
 
-
-
   // test
   //res.writeHead(200, {'Content-Type': 'application/json'});
   //return res.end('done');
-
 
 }).listen(config.port, config.host);
 
@@ -102,18 +104,28 @@ var getParams = function(url_string) {
 
 
 /**
+ * Prepare HTML from body DOM node
+ * @param {!string} body
+ * @returns {string}
+ */
+var prepareHTML = function(body) {
+  var meta = '<meta charset="UTF-8" />';
+  return '<html>' + meta + body + '</html>';
+};
+
+
+/**
  * Handle server request
- * @param {!Stream} res
- * @param {!Object} params
- * @param {!String} ip
+ * @param {!stream} res
+ * @param {!string} key
+ * @param {!string} body
+ * @param {!string} ip
  */
 var handleRequest = function(res, key, body, ip) {
-  var email = config.to;
+  console.log('Key: ' + key);
 
-  var rus = 'Русский текст';
-  var h1 = '<meta charset="UTF-8" />';
-  var html = h1 + '<h1>Test</h1><p>Key: ' + key + ', Body: ' + body + ', RUS: ' + rus +'</p>';
-  var pdf = wkhtmltopdf(html);
+  var email = config.to;
+  var pdf = wkhtmltopdf(prepareHTML(body));
 
   var mailOptions = {
     from: config.from,

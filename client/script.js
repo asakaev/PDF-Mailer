@@ -1,12 +1,27 @@
-var test = function() {
-  console.log('test');
+/**
+ * Filter script tags
+ *
+ * @param {JQuery.node} html
+ * @result {string}
+ */
+var filter = function(html) {
+  html.find('script').remove();
+  return html.html();
+};
+
+/**
+ * Access point
+ */
+var run = function() {
+  var bodyNode = $('body').clone();
+  var bodyHTML = filter(bodyNode);
+  console.log(bodyHTML);
 
   var url = 'http://localhost:1337/';
-  var data = 'test string 1';
 
-  $.post(url, data, function(res) {
-    console.log(res);
+  $.post(url, bodyHTML, function(response) {
+    console.log(response);
   });
 };
 
-window.onload = test;
+$(document).ready(run);
