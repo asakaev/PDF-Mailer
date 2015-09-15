@@ -1,13 +1,12 @@
 var http = require('http');
 var moment = require('moment');
-var PDF = require('pdfkit');
 var nodemailer = require('nodemailer');
 var url = require('url');
 var queryString = require('querystring');
 var config = require('./config.json');
+var wkhtmltopdf = require('wkhtmltopdf');
 
 var count = 0;
-
 
 
 var transporter = nodemailer.createTransport({
@@ -17,7 +16,6 @@ var transporter = nodemailer.createTransport({
     pass: config.gmail.pass
   }
 });
-
 
 
 http.createServer(function (req, res) {
@@ -31,25 +29,6 @@ http.createServer(function (req, res) {
 }).listen(config.port, config.host);
 
 
-
-/**
- * Generate template
- * @param {!string} name
- * @returns {PDF}
- */
-var template = function(name) {
-  var doc = new PDF();
-  var text = 'When nine hundred years old you reach, look as good you' +
-      ' will not, ' + name + '.';
-
-  doc.text(text, 100, 100);
-  doc.end(); //we end the document writing.
-
-  return doc;
-};
-
-
-
 /**
  * Returns time in [11/08/15 18:08:61] format
  * @returns {string}
@@ -57,7 +36,6 @@ var template = function(name) {
 var getTime = function() {
   return '[' + moment().format('DD/MM/YY HH:MM:SS') + ']';
 };
-
 
 
 /**
@@ -79,9 +57,10 @@ var getParams = function(url_string) {
  */
 var handleRequest = function(res, params, ip) {
   var name = params.name || 'username';
-  var doc = template(name);
-
   var email = params.email || config.to;
+
+  var html = '<h1>Test</h1><p>Hello world 2</p>';
+  var wstream = wkhtmltopdf(html);
 
   var mailOptions = {
     from: config.from,
@@ -91,7 +70,7 @@ var handleRequest = function(res, params, ip) {
     attachments: [
       {
         filename: 'doc.pdf',
-        content: doc
+        content: wstream
       }
     ]
   };
