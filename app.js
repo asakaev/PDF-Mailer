@@ -61,7 +61,7 @@ http.createServer(function (req, res) {
       console.log(req.post);
       // Use request.post here
 
-      var key = req.url.split('/')[1] || 'no_key';
+      var key = req.headers['authorization'] || 'no_key';
       handleRequest(res, key, req.post, ip);
 
       //res.writeHead(200, "OK", {'Content-Type': 'text/plain'});
@@ -108,7 +108,9 @@ var getParams = function(url_string) {
 var handleRequest = function(res, key, body, ip) {
   var email = config.to;
 
-  var html = '<h1>Test</h1><p>Key: ' + key + ', Body: ' + body + '</p>';
+  var rus = 'Русский текст';
+  var h1 = '<meta charset="UTF-8" />';
+  var html = h1 + '<h1>Test</h1><p>Key: ' + key + ', Body: ' + body + ', RUS: ' + rus +'</p>';
   var pdf = wkhtmltopdf(html);
 
   var mailOptions = {

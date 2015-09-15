@@ -1,5 +1,5 @@
 # PDF-Mailer
 
-Usage: `echo "test string" | curl -v --data-binary @- --request "POST" "http://localhost:1337/secret_key"`
+application/x-www-form-urlencoded (63 bytes): `echo "<h1>Test</h1><p>Данные из echo на русском</p>" | curl -v --data-binary @- -H "Authorization: secret_key" --request "POST" "http://localhost:1337/"`
 
-Note: application/x-www-form-urlencoded
+form-data (257 bytes): `echo "<h1>Test</h1><p>Данные из echo на русском</p>" | curl -v --form "image=@-" http://localhost:1337/secret_key2`
