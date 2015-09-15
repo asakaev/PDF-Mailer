@@ -2,7 +2,7 @@ var http = require('http');
 var moment = require('moment');
 var nodemailer = require('nodemailer');
 var url = require('url');
-var queryString = require('querystring');
+var querystring = require('querystring');
 var config = require('./etc/config.json');
 var wkhtmltopdf = require('wkhtmltopdf');
 
@@ -18,6 +18,34 @@ var transporter = nodemailer.createTransport({
 });
 
 
+function processPost(request, response, callback) {
+  var queryData = "";
+  if(typeof callback !== 'function') return null;
+
+  if(request.method == 'POST') {
+    request.on('data', function(data) {
+      queryData += data;
+      if(queryData.length > 1e6) {
+        queryData = "";
+        response.writeHead(413, {'Content-Type': 'text/plain'}).end();
+        request.connection.destroy();
+      }
+    });
+
+    request.on('end', function() {
+      request.post = queryData;
+      callback();
+    });
+
+  } else {
+    response.writeHead(405, {'Content-Type': 'text/plain'});
+    response.end();
+  }
+}
+
+
+
+
 http.createServer(function (req, res) {
   var ip = req.connection.remoteAddress;
   var agent = req.headers["user-agent"];
@@ -25,7 +53,29 @@ http.createServer(function (req, res) {
   var params = getParams(req.url);
   console.log((count).toString(), ip, getTime(), JSON.stringify(params));
 
-  handleRequest(res, params, ip);
+  if (req.method != 'POST') {
+    res.writeHead(200, "OK", {'Content-Type': 'text/plain'});
+    res.end('not post');
+  } else {
+    processPost(req, res, function () {
+      console.log(req.post);
+      // Use request.post here
+
+      var key = req.url.split('/')[1] || 'no_key';
+      handleRequest(res, key, req.post, ip);
+
+      //res.writeHead(200, "OK", {'Content-Type': 'text/plain'});
+      //res.end();
+    });
+  }
+
+
+
+  // test
+  //res.writeHead(200, {'Content-Type': 'application/json'});
+  //return res.end('done');
+
+
 }).listen(config.port, config.host);
 
 
@@ -45,7 +95,7 @@ var getTime = function() {
  */
 var getParams = function(url_string) {
   var qs = url.parse(url_string).query;
-  return queryString.parse(qs);
+  return querystring.parse(qs);
 };
 
 
@@ -55,11 +105,10 @@ var getParams = function(url_string) {
  * @param {!Object} params
  * @param {!String} ip
  */
-var handleRequest = function(res, params, ip) {
-  var name = params.name || 'username';
-  var email = params.email || config.to;
+var handleRequest = function(res, key, body, ip) {
+  var email = config.to;
 
-  var html = '<h1>Test</h1><p>Hello, ' + name + '</p>';
+  var html = '<h1>Test</h1><p>Key: ' + key + ', Body: ' + body + '</p>';
   var pdf = wkhtmltopdf(html);
 
   var mailOptions = {
