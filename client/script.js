@@ -78,4 +78,8 @@
    * Button handler
    */
   $('.pdf_button').click(pdfmailer.run);
+
+  $('doucument').ready(function() {
+    $('.pdf_div').css("visibility", "visible");
+  });
 }());
