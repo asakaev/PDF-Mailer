@@ -25,12 +25,13 @@
 
 
   /**
-   *
+   * Validate email
    * @param {!string} email
    * @return {boolean}
    */
   pdfmailer.isValidEmail = function(email) {
-    return email.trim() !== '';
+    var re = /^([\w-]+(?:\.[\w-]+)*)@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?)$/i;
+    return re.test(email);
   };
 
 
@@ -51,8 +52,12 @@
 
     var url = 'http://localhost:1337/';
 
-    function responseHandler(data) {
-      console.log(data);
+    function responseHandler(data, status) {
+      if (status === 'success') {
+        console.log(data);
+      } else {
+        console.log('Request failed.');
+      }
     }
 
     $.ajax({

@@ -6,8 +6,7 @@ var querystring = require('querystring');
 var config = require('./etc/config.json');
 var wkhtmltopdf = require('wkhtmltopdf');
 
-var count = 0;
-
+var reqNumber = 0;
 
 var transporter = nodemailer.createTransport({
   service: 'Gmail',
@@ -16,6 +15,28 @@ var transporter = nodemailer.createTransport({
     pass: config.gmail.pass
   }
 });
+
+
+/**
+ * @type {{BAD_REQUEST: number, OK: number, METHOD_NOT_ALLOWED: number, REQUEST_TOO_LARGE: number}}
+ */
+var CODE = {
+  BAD_REQUEST: 400,
+  OK: 200,
+  METHOD_NOT_ALLOWED: 405,
+  REQUEST_TOO_LARGE: 413
+};
+
+
+/**
+ * Validate email
+ * @param {!string} email
+ * @return {boolean}
+ */
+var isValidEmail = function(email) {
+  var re = /^([\w-]+(?:\.[\w-]+)*)@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?)$/i;
+  return re.test(email);
+};
 
 
 /**
@@ -36,7 +57,8 @@ function processPost(request, response, callback) {
       queryData += data;
       if (queryData.length > 1e6) {
         queryData = '';
-        response.writeHead(413, {'Content-Type': 'text/plain'}).end();
+        response.writeHead(CODE.REQUEST_TOO_LARGE,
+            {'Content-Type': 'text/plain'}).end();
         request.connection.destroy();
       }
     });
@@ -47,7 +69,8 @@ function processPost(request, response, callback) {
     });
 
   } else {
-    response.writeHead(405, {'Content-Type': 'text/plain'});
+    response.writeHead(CODE.METHOD_NOT_ALLOWED,
+        {'Content-Type': 'text/plain'});
     response.end();
   }
 }
@@ -56,40 +79,40 @@ function processPost(request, response, callback) {
 http.createServer(function(req, res) {
   var ip = req.connection.remoteAddress;
   var agent = req.headers['user-agent'];
-  console.log((++count).toString(), ip, getTime(), req.method, req.url, agent);
-  var params = getParams(req.url);
-  console.log((count).toString(), ip, getTime(), JSON.stringify(params));
+  console.log((++reqNumber).toString(), ip, getTime(), req.method, req.url, agent);
 
   res.setHeader('Access-Control-Allow-Origin', config.origin);
   res.setHeader('Access-Control-Allow-Methods', 'POST');
   res.setHeader('Access-Control-Allow-Headers', 'Authorization, PDF-Email');
 
+  if (req.method === 'OPTIONS') {
+    res.writeHead(CODE.OK, {'Content-Type': 'text/plain'});
+    return res.end();
+  }
+
   var email = req.headers['pdf-email'];
+  console.log('email:', email);
 
   var text;
   var result;
 
-  if (!email) {
-    text = 'Email is empty';
+  if (!isValidEmail(email)) {
+    text = 'Email is not valid';
     result = JSON.stringify({ status: 'error', message: text});
     console.log(text);
-    res.writeHead(200, {'Content-Type': 'application/json'});
+    res.writeHead(CODE.BAD_REQUEST, {'Content-Type': 'application/json'});
     return res.end(result);
   }
-
-  console.log('email:', email);
 
   if (req.method !== 'POST') {
     text = 'POST method allowed only';
     result = JSON.stringify({ status: 'error', message: text});
     console.log(text);
-    res.writeHead(200, {'Content-Type': 'application/json'});
+    res.writeHead(CODE.OK, {'Content-Type': 'application/json'});
     return res.end(result);
   }
 
   processPost(req, res, function() {
-    console.log(req.post);
-
     var key = req.headers['authorization'] || 'no_key';
     handleRequest(res, key, req.post, ip);
   });
@@ -102,7 +125,7 @@ http.createServer(function(req, res) {
  * @return {string}
  */
 var getTime = function() {
-  return '[' + moment().format('DD/MM/YY HH:MM:SS') + ']';
+  return '[' + moment().format('DD/MM/YY HH:MM:SS:SSS') + ']';
 };
 
 
@@ -153,20 +176,20 @@ var handleRequest = function(res, key, body, ip) {
     var result;
 
     if (error) {
-      console.log('ERROR:', (count).toString(), ip, getTime(), error);
+      console.log('ERROR:', (reqNumber).toString(), ip, getTime(), error);
       result = JSON.stringify({
         status: 'error',
         message: 'Failed to send email'
       });
     } else {
-      console.log((count).toString(), ip, getTime(), info.response);
+      console.log((reqNumber).toString(), ip, getTime(), info.response);
       result = JSON.stringify({
         status: 'ok',
         message: 'Email send'
       });
     }
 
-    res.writeHead(200, {'Content-Type': 'application/json'});
+    res.writeHead(CODE.OK, {'Content-Type': 'application/json'});
     res.end(result);
   });
 };
