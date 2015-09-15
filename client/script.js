@@ -1,27 +1,45 @@
 /**
+ * @namespace
+ */
+var pdfmailer = {};
+
+
+/**
  * Filter script tags
  *
  * @param {JQuery.node} html
  * @result {string}
  */
-var filter = function(html) {
+pdfmailer.filter = function(html) {
   html.find('script').remove();
+  html.find(':button').remove();
   return html.html();
 };
+
 
 /**
  * Access point
  */
-var run = function() {
+pdfmailer.run = function() {
   var bodyNode = $('body').clone();
-  var bodyHTML = filter(bodyNode);
+  var bodyHTML = pdfmailer.filter(bodyNode);
   console.log(bodyHTML);
 
   var url = 'http://localhost:1337/';
 
-  $.post(url, bodyHTML, function(response) {
-    console.log(response);
+  function responseHandler(data) {
+    console.log(data);
+  }
+
+  $.ajax({
+    url: url,
+    type: 'POST',
+    beforeSend: function (xhr) {
+      xhr.setRequestHeader('Authorization', 'key_42');
+    },
+    data: bodyHTML,
+    contentType: 'application/x-www-form-urlencoded',
+    success: responseHandler,
+    error: responseHandler
   });
 };
-
-$(document).ready(run);

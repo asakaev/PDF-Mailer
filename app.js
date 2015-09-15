@@ -59,6 +59,8 @@ http.createServer(function (req, res) {
   console.log((count).toString(), ip, getTime(), JSON.stringify(params));
 
   res.setHeader('Access-Control-Allow-Origin', config.origin);
+  res.setHeader('Access-Control-Allow-Methods', "POST");
+  res.setHeader('Access-Control-Allow-Headers', "Authorization");
 
   if (req.method != 'POST') {
     res.writeHead(200, "OK", {'Content-Type': 'text/plain'});
