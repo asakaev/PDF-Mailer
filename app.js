@@ -3,7 +3,7 @@ var moment = require('moment');
 var nodemailer = require('nodemailer');
 var url = require('url');
 var queryString = require('querystring');
-var config = require('./config.json');
+var config = require('./etc/config.json');
 var wkhtmltopdf = require('wkhtmltopdf');
 
 var count = 0;
@@ -59,8 +59,8 @@ var handleRequest = function(res, params, ip) {
   var name = params.name || 'username';
   var email = params.email || config.to;
 
-  var html = '<h1>Test</h1><p>Hello world 2</p>';
-  var wstream = wkhtmltopdf(html);
+  var html = '<h1>Test</h1><p>Hello, ' + name + '</p>';
+  var pdf = wkhtmltopdf(html);
 
   var mailOptions = {
     from: config.from,
@@ -70,7 +70,7 @@ var handleRequest = function(res, params, ip) {
     attachments: [
       {
         filename: 'doc.pdf',
-        content: wstream
+        content: pdf
       }
     ]
   };
