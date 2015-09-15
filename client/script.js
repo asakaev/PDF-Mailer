@@ -9,12 +9,22 @@
    * Filter script tags
    *
    * @param {JQuery.node} html
-   * @result {string}
+   * @returns {string}
    */
   pdfmailer.filter = function(html) {
     html.find('script').remove();
     html.find(':button').remove();
     return html.html();
+  };
+
+
+  /**
+   *
+   * @param {!string} email
+   * @returns {boolean}
+   */
+  pdfmailer.isValidEmail = function(email) {
+    return email.trim() !== '';
   };
 
 
@@ -25,6 +35,13 @@
     var bodyNode = $('body').clone();
     var bodyHTML = pdfmailer.filter(bodyNode);
     console.log(bodyHTML);
+
+    var email = $('.pdf_email').val();
+    console.log('email:', email);
+
+    if (!pdfmailer.isValidEmail(email)) {
+      return console.log('Invalid email');
+    }
 
     var url = 'http://localhost:1337/';
 
@@ -45,5 +62,8 @@
     });
   };
 
+  /**
+   * Button handler
+   */
   $('.pdf_button').click(pdfmailer.run);
 }());
