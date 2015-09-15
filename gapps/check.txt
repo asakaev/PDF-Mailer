@@ -1,0 +1,15 @@
+https://script.google.com/macros/s/AKfycbxfWY3oPDQJoHA_t1UZt4gDEc0cGFrw_aSwhK1izOVQOw3y_4E/exec?email=YOUR@MAIL.COM&name=YOURNAME
+
+{
+  "parameter": {
+    "email": "YOUR@MAIL.COM"
+  },
+  "contextPath": "",
+  "contentLength": -1,
+  "queryString": "email=YOUR@MAIL.COM",
+  "parameters": {
+    "email": [
+      "YOUR@MAIL.COM"
+    ]
+  }
+}
