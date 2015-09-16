@@ -1,6 +1,6 @@
 (function() {
   /**
-   * Application namespace
+   * PDF-Mailer namespace
    * @namespace
    */
   var pdfmailer = {};
@@ -12,6 +12,67 @@
    */
   pdfmailer.UNIQUE_ID = '1c711fe53cd08eea5055337c8f9278b7';
 
+
+  /**
+   * View namespace
+   * @namespace
+   */
+  var view = {};
+
+
+  /**
+   * Base DIV
+   * @type {string}
+   */
+  view.PDFDIV = 'pdf_div';
+
+
+  /**
+   * Fade-out message
+   * @type {string}
+   */
+  view.PDFMESSAGE = 'pdf_message';
+
+
+  /**
+   * Add elements to DOM and subscribe to events
+   */
+  view.create = function() {
+    var block = '<div class="' + view.PDFDIV + '">' +
+        '<input class="pdf_email" type="text"/>' +
+        '<input type="button" class="pdf_button" value="Click Me!">' +
+        '</div>';
+
+    $('.bottom_div').append(block);
+    $('.pdf_button').click(pdfmailer.run);
+  };
+
+
+  /**
+   * Show invalid email message
+   */
+  view.showInvalidEmail = function(message) {
+    var html = '<p class="' + view.PDFMESSAGE + '">' + message + '</p>';
+    var appNode = '.' + view.PDFDIV;
+    var messageNode = appNode + ' .' + view.PDFMESSAGE;
+
+    $(appNode).append(html);
+
+    $(messageNode).fadeOut(3000, function() {
+      $(this).remove();
+    });
+  };
+
+
+  /**
+   * Remove PDF UI from DOM
+   */
+  view.destroy = function(message) {
+    var html = '<p>' + message + '</p>';
+    $('.' + view.PDFDIV).html(html);
+  };
+
+
   /**
    * Filter script tags
    *
@@ -22,7 +83,8 @@
     html.find('script').remove();
     html.find(':button').remove();
     html.find(':input').remove();
-    return html.html();
+    html.html();
+    return;
   };
 
 
@@ -49,16 +111,10 @@
     console.log('email:', email);
 
     if (!pdfmailer.isValidEmail(email)) {
-      return console.log('Invalid email');
-    }
-
-
-    /**
-     * Remove PDF UI from DOM
-     */
-    function destroyView(message) {
-      var html = '<p>' + message + '</p>';
-      $('.pdf_div').html(html);
+      var message = 'Invalid email';
+      view.showInvalidEmail(message);
+      console.log(message);
+      return;
     }
 
 
@@ -70,8 +126,7 @@
     function responseHandler(data, status) {
       if (status === 'success') {
         console.log(data);
-        destroyView(data.message);
-
+        view.destroy(data.message);
       } else {
         console.log('Request failed.');
       }
@@ -99,21 +154,7 @@
 
 
   /**
-   * Add elements to DOM and subscribe to events
-   */
-  function createView() {
-    var block = '<div class="pdf_div">' +
-        '<input class="pdf_email" type="text"/>' +
-        '<input type="button" class="pdf_button" value="Click Me!">' +
-        '</div>';
-
-    $('.bottom_div').append(block);
-    $('.pdf_button').click(pdfmailer.run);
-  }
-
-
-  /**
    * On document ready
    */
-  $('document').ready(createView);
+  $('document').ready(view.create);
 }());
