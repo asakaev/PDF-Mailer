@@ -24,26 +24,33 @@
    * Base DIV
    * @type {string}
    */
-  view.PDFDIV = 'pdf_div';
+  view.DIVAPP = 'pdf_div';
+
+
+  /**
+   * Base DIV to attach
+   * @type {string}
+   */
+  view.DIVBASE = 'bottom_div';
 
 
   /**
    * Fade-out message
    * @type {string}
    */
-  view.PDFMESSAGE = 'pdf_message';
+  view.DIVMESSAGE = 'pdf_message';
 
 
   /**
    * Add elements to DOM and subscribe to events
    */
   view.create = function() {
-    var block = '<div class="' + view.PDFDIV + '">' +
+    var block = '<div class="' + view.DIVAPP + '">' +
         '<input class="pdf_email" type="text"/>' +
         '<input type="button" class="pdf_button" value="Click Me!">' +
         '</div>';
 
-    $('.bottom_div').append(block);
+    $('.' + view.DIVBASE).append(block);
     $('.pdf_button').click(pdfmailer.run);
   };
 
@@ -52,12 +59,11 @@
    * Show invalid email message
    */
   view.showInvalidEmail = function(message) {
-    var html = '<p class="' + view.PDFMESSAGE + '">' + message + '</p>';
-    var appNode = '.' + view.PDFDIV;
-    var messageNode = appNode + ' .' + view.PDFMESSAGE;
+    var html = '<p class="' + view.DIVMESSAGE + '">' + message + '</p>';
+    var appNode = '.' + view.DIVAPP;
+    var messageNode = appNode + ' .' + view.DIVMESSAGE;
 
     $(appNode).append(html);
-
     $(messageNode).fadeOut(3000, function() {
       $(this).remove();
     });
@@ -69,7 +75,7 @@
    */
   view.destroy = function(message) {
     var html = '<p>' + message + '</p>';
-    $('.' + view.PDFDIV).html(html);
+    $('.' + view.DIVAPP).html(html);
   };
 
 
