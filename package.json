@@ -1,6 +1,6 @@
 {
   "name": "PDF-Mailer",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "license": "MIT",
   "private": true,
   "repository": {
@@ -8,6 +8,7 @@
     "url": "https://github.com/tematema/PDF-Mailer"
   },
   "dependencies": {
+    "atob": "^1.1.2",
     "moment": "^2.10.6",
     "nodemailer": "^1.4.0",
     "wkhtmltopdf": "^0.1.5"

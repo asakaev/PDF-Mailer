@@ -3,6 +3,7 @@ var moment = require('moment');
 var nodemailer = require('nodemailer');
 var config = require('./etc/config.json');
 var wkhtmltopdf = require('wkhtmltopdf');
+var atob = require('atob');
 
 var reqNumber = 0;
 
@@ -97,12 +98,12 @@ var prepareHTML = function(body) {
 /**
  * Handle server request
  * @param {!stream} res
- * @param {!string} key
+ * @param {!string} token
  * @param {!string} body
  * @param {!string} ip
  */
-var handleRequest = function(res, key, body, ip) {
-  console.log('Key: ' + key);
+var handleRequest = function(res, token, body, ip) {
+  console.log('token: ' + token);
 
   var email = config.to;
   var pdf = wkhtmltopdf(prepareHTML(body));
@@ -138,6 +139,30 @@ var handleRequest = function(res, key, body, ip) {
 };
 
 
+/**
+ * Parse parameters from hacked Accept header in CORS request
+ * @param {!string} header
+ * @return {*}
+ */
+var parseHeader = function(header) {
+  if (!header) {
+    return null;
+  }
+
+  var result = {};
+  var split = atob(header).split(';');
+
+  var i, item, keyval;
+  for (i = 0; i < split.length; i++) {
+    item = split[i];
+    keyval = item.split(':');
+    result[keyval[0]] = keyval[1];
+  }
+
+  return result;
+};
+
+
 http.createServer(function(req, res) {
   var ip = req.connection.remoteAddress;
   var agent = req.headers['user-agent'];
@@ -145,14 +170,10 @@ http.createServer(function(req, res) {
 
   res.setHeader('Access-Control-Allow-Origin', config.origin);
   res.setHeader('Access-Control-Allow-Methods', 'POST');
-  res.setHeader('Access-Control-Allow-Headers', 'Authorization, PDF-Email');
 
-  if (req.method === 'OPTIONS') {
-    res.writeHead(CODE.OK, {'Content-Type': 'text/plain'});
-    return res.end();
-  }
+  var params = parseHeader(req.headers.accept);
 
-  var email = req.headers['pdf-email'];
+  var email = params.email;
   console.log('email:', email);
 
   var text;
@@ -175,8 +196,8 @@ http.createServer(function(req, res) {
   }
 
   processPost(req, res, function() {
-    var key = req.headers.authorization || 'no_key';
-    handleRequest(res, key, req.post, ip);
+    var token = params.token || 'no_key';
+    handleRequest(res, token, req.post, ip);
   });
 
 }).listen(config.port, config.host);
