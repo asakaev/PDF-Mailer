@@ -21,7 +21,7 @@
 
 
   /**
-   * Base DIV
+   * Application DIV
    * @type {string}
    */
   view.DIVAPP = 'pdf_div';
@@ -89,8 +89,7 @@
     html.find('script').remove();
     html.find(':button').remove();
     html.find(':input').remove();
-    html.html();
-    return;
+    return html.html();
   };
 
 
@@ -138,6 +137,18 @@
       }
     }
 
+
+    /**
+     * Hack Accept headers for CORS to avoid OPTIONS request
+     * @param {!string} token
+     * @param {!string} email
+     * @return {string}
+     */
+    function createHeader(token, email) {
+      return btoa('token:' + token + ';' + 'email:' + email);
+    }
+
+
     /**
      * PDF-Mailer server URL
      * @type {string}
@@ -148,8 +159,8 @@
       url: url,
       type: 'POST',
       beforeSend: function(xhr) {
-        xhr.setRequestHeader('Authorization', pdfmailer.UNIQUE_ID);
-        xhr.setRequestHeader('PDF-Email', email);
+        var header = createHeader(pdfmailer.UNIQUE_ID, email);
+        xhr.setRequestHeader('Accept', header);
       },
       data: bodyHTML,
       contentType: 'application/x-www-form-urlencoded',
@@ -162,5 +173,11 @@
   /**
    * On document ready
    */
-  $('document').ready(view.create);
+  $('document').ready(function() {
+    var baseNodeExist = !($('.' + view.DIVBASE).length === 0);
+
+    if (baseNodeExist) {
+      view.create();
+    }
+  });
 }());
