@@ -1,11 +1,13 @@
 (function() {
   /**
+   * Application namespace
    * @namespace
    */
   var pdfmailer = {};
 
 
   /**
+   * Unique user ID
    * @type {string}
    */
   pdfmailer.UNIQUE_ID = '1c711fe53cd08eea5055337c8f9278b7';
@@ -50,15 +52,36 @@
       return console.log('Invalid email');
     }
 
-    var url = 'http://localhost:1337/';
 
+    /**
+     * Remove PDF UI from DOM
+     */
+    function destroyView(message) {
+      var html = '<p>' + message + '</p>';
+      $('.pdf_div').html(html);
+    }
+
+
+    /**
+     * Handle XHR response
+     * @param {Object} data
+     * @param {string} status
+     */
     function responseHandler(data, status) {
       if (status === 'success') {
         console.log(data);
+        destroyView(data.message);
+
       } else {
         console.log('Request failed.');
       }
     }
+
+    /**
+     * PDF-Mailer server URL
+     * @type {string}
+     */
+    var url = 'http://localhost:1337/';
 
     $.ajax({
       url: url,
@@ -74,12 +97,23 @@
     });
   };
 
-  /**
-   * Button handler
-   */
-  $('.pdf_button').click(pdfmailer.run);
 
-  $('doucument').ready(function() {
-    $('.pdf_div').css("visibility", "visible");
-  });
+  /**
+   * Add elements to DOM and subscribe to events
+   */
+  function createView() {
+    var block = '<div class="pdf_div">' +
+        '<input class="pdf_email" type="text"/>' +
+        '<input type="button" class="pdf_button" value="Click Me!">' +
+        '</div>';
+
+    $('.bottom_div').append(block);
+    $('.pdf_button').click(pdfmailer.run);
+  }
+
+
+  /**
+   * On document ready
+   */
+  $('document').ready(createView);
 }());
