@@ -156,7 +156,7 @@ var parseHeader = function(header) {
   for (i = 0; i < split.length; i++) {
     item = split[i];
     keyval = item.split(':');
-    result[keyval[0]] = keyval[1];
+    result[keyval[0]] = keyval[1].trim();
   }
 
   return result;
