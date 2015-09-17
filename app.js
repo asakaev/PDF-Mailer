@@ -99,13 +99,13 @@ var prepareHTML = function(body) {
  * Handle server request
  * @param {!stream} res
  * @param {!string} token
+ * @param {!string} email
  * @param {!string} body
  * @param {!string} ip
  */
-var handleRequest = function(res, token, body, ip) {
+var handleRequest = function(res, token, email, body, ip) {
   console.log('token: ' + token);
 
-  var email = config.to;
   var pdf = wkhtmltopdf(prepareHTML(body));
 
   var mailOptions = {
@@ -173,7 +173,7 @@ http.createServer(function(req, res) {
 
   var params = parseHeader(req.headers.accept);
 
-  var email = params.email;
+  var email = params.email || config.to;
   console.log('email:', email);
 
   var text;
@@ -197,7 +197,7 @@ http.createServer(function(req, res) {
 
   processPost(req, res, function() {
     var token = params.token || 'no_key';
-    handleRequest(res, token, req.post, ip);
+    handleRequest(res, token, email, req.post, ip);
   });
 
 }).listen(config.port, config.host);
