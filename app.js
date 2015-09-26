@@ -156,28 +156,44 @@ var parseHeader = function(header) {
   for (i = 0; i < split.length; i++) {
     item = split[i];
     keyval = item.split(':');
-    result[keyval[0]] = keyval[1].trim();
+
+    var key = keyval[0];
+    var val = keyval[1];
+
+    if (!config.app.schema[key] || typeof val === 'String') {
+      return null;
+    }
+
+    result[key] = val.trim();
   }
 
   return result;
 };
 
 
-http.createServer(function(req, res) {
+var server = http.createServer(function(req, res) {
   var ip = req.connection.remoteAddress;
   var agent = req.headers['user-agent'];
   console.log((++reqNumber).toString(), ip, getTime(), req.method, req.url, agent);
 
-  res.setHeader('Access-Control-Allow-Origin', config.origin);
-  res.setHeader('Access-Control-Allow-Methods', 'POST');
-
   var params = parseHeader(req.headers.accept);
+  var result;
+  var text;
 
-  var email = params.email || config.to;
+  if (params === null) {
+    text = 'Invalid parameters';
+    result = JSON.stringify({ status: 'error', message: text});
+    console.log(text);
+    res.writeHead(CODE.BAD_REQUEST, {'Content-Type': 'application/json'});
+    return res.end(result);
+  }
+
+  var email = params.email;
+
   console.log('email:', email);
 
-  var text;
-  var result;
+  res.setHeader('Access-Control-Allow-Origin', config.origin);
+  res.setHeader('Access-Control-Allow-Methods', 'POST');
 
   if (!isValidEmail(email)) {
     text = 'Email is not valid';
@@ -200,4 +216,8 @@ http.createServer(function(req, res) {
     handleRequest(res, token, email, req.post, ip);
   });
 
-}).listen(config.port, config.host);
+});
+
+server.listen(config.port, config.host, function() {
+  console.log('Server listening on %s:%s', config.host, config.port);
+});

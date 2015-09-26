@@ -10,5 +10,12 @@
 
   "from": "Mail Tester <your@email.com>",
   "to": "somebody@email.com",
-  "subject": "Test subject"
+  "subject": "Test subject",
+
+  "app": {
+    "schema": {
+      "token": true,
+      "email": true
+    }
+  }
 }

@@ -1,12 +1,6 @@
 {
   "name": "PDF-Mailer",
-  "version": "1.1.0",
-  "license": "MIT",
-  "private": true,
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/tematema/PDF-Mailer"
-  },
+  "version": "1.2.0",
   "dependencies": {
     "atob": "^1.1.2",
     "moment": "^2.10.6",
