@@ -152,15 +152,14 @@ var parseHeader = function(header) {
   var result = {};
   var split = atob(header).split(';');
 
-  var i, item, keyval;
-  for (i = 0; i < split.length; i++) {
-    item = split[i];
-    keyval = item.split(':');
+  for (var i = 0; i < split.length; i++) {
+    var item = split[i];
+    var keyval = item.split(':');
 
     var key = keyval[0];
     var val = keyval[1];
 
-    if (!config.app.schema[key] || typeof val === 'String') {
+    if (!config.app.schema[key] || typeof val !== 'string') {
       return null;
     }
 
