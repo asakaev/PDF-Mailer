@@ -6,7 +6,8 @@ gulp.task('default', function() {
     './lib/external.js',
     './lib/util.js',
     './lib/html.js',
-    './lib/*.js'
+    './lib/code.js',
+    './lib/server.js'
   ];
 
   gulp.src(files).pipe(concat('app.js')).pipe(gulp.dest('./bin/'));
