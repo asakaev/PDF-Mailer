@@ -10,6 +10,11 @@ gulp
 node ./bin/app.js
 ```
 
+### Tests:
+```
+npm test
+```
+
 ### API:
 ```
 POST multipart/form-data:

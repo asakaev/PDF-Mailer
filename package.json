@@ -9,11 +9,13 @@
     "wkhtmltopdf": "^0.1.5"
   },
   "scripts": {
-    "start": "node app.js"
+    "start": "node app.js",
+    "test": "mocha tests/server.js"
   },
   "devDependencies": {
     "gulp": "^3.9.0",
-    "gulp-concat": "^2.6.0"
+    "gulp-concat": "^2.6.0",
+    "should": "^8.1.1"
   },
   "description": "pdf-mailer",
   "main": "./bin/app.js",
@@ -29,5 +31,8 @@
   "bugs": {
     "url": "https://github.com/tematema/PDF-Mailer/issues"
   },
-  "homepage": "https://github.com/tematema/PDF-Mailer#readme"
+  "homepage": "https://github.com/tematema/PDF-Mailer#readme",
+  "directories": {
+    "test": "tests"
+  }
 }
