@@ -4,6 +4,8 @@ var concat = require('gulp-concat');
 gulp.task('default', function() {
   var files = [
     './lib/external.js',
+    './lib/util.js',
+    './lib/html.js',
     './lib/*.js'
   ];
 
