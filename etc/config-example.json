@@ -14,7 +14,7 @@
 
   "app": {
     "schema": {
-      "token": true,
+      "key": true,
       "email": true
     }
   }
