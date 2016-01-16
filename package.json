@@ -1,6 +1,6 @@
 {
   "name": "pdf-mailer",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "dependencies": {
     "atob": "^1.1.2",
     "busboy": "^0.2.12",
