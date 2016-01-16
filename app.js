@@ -4,6 +4,7 @@ var nodemailer = require('nodemailer');
 var config = require('./etc/config.json');
 var wkhtmltopdf = require('wkhtmltopdf');
 var atob = require('atob');
+var Busboy = require('busboy');
 
 var reqNumber = 0;
 
@@ -140,17 +141,17 @@ var handleRequest = function(res, token, email, body, ip) {
 
 
 /**
- * Parse parameters from hacked Accept header in CORS request
- * @param {!string} header
+ * Parse hash from base64 encoded field in CORS request
+ * @param {!string} hash
  * @return {*}
  */
-var parseHeader = function(header) {
-  if (!header) {
+var parseHash = function(hash) {
+  if (!hash) {
     return null;
   }
 
   var result = {};
-  var split = atob(header).split(';');
+  var split = atob(hash).split(';');
 
   for (var i = 0; i < split.length; i++) {
     var item = split[i];
@@ -170,49 +171,125 @@ var parseHeader = function(header) {
 };
 
 
-var server = http.createServer(function(req, res) {
-  var ip = req.connection.remoteAddress;
-  var agent = req.headers['user-agent'];
-  console.log((++reqNumber).toString(), ip, getTime(), req.method, req.url, agent);
 
-  var params = parseHeader(req.headers.accept);
+var getMultipartData = function(req, callback) {
+  var busboy = new Busboy({ headers: req.headers });
+
+  var fileData = '';
+  var token = '';
+
+  busboy.on('file', function(fieldname, file, filename, encoding, mimetype) {
+    console.log('File [' + fieldname + ']: filename: ' + filename +
+        ', encoding: ' + encoding + ', mimetype: ' + mimetype);
+
+    file.on('data', function(data) {
+      console.log('File [' + fieldname + '] got ' + data.length + ' bytes');
+      fileData += data;
+    });
+
+    file.on('end', function() {
+      console.log('File [' + fieldname + '] Finished');
+
+      console.log(fileData);
+    });
+  });
+
+  busboy.on('field', function(fieldname, val) {
+    console.log('Field [' + fieldname + ']: value: ' + val);
+    token = val;
+  });
+
+  busboy.on('finish', function() {
+    var result = {
+      file: fileData,
+      hash: token
+    };
+
+    callback(null, result);
+  });
+
+  req.pipe(busboy);
+};
+
+
+var makeResponse = function(res, data) {
+  res.writeHead(data.code, {'Content-Type': 'application/json'});
+  res.end(JSON.stringify(data.result));
+};
+
+
+var checkParameters = function(hash) {
+  var params = parseHash(hash);
   var result;
   var text;
 
+  var email = params.email;
+  console.log('email:', email);
+
+  console.log(params);
+
   if (params === null) {
     text = 'Invalid parameters';
-    result = JSON.stringify({ status: 'error', message: text});
+    result = { status: 'error', message: text};
     console.log(text);
-    res.writeHead(CODE.BAD_REQUEST, {'Content-Type': 'application/json'});
-    return res.end(result);
+
+    return {
+      code: CODE.BAD_REQUEST,
+      result: result
+    };
   }
 
-  var email = params.email;
+  if (!isValidEmail(email)) {
+    text = 'Email is not valid';
+    result = { status: 'error', message: text};
+    console.log(text);
 
-  console.log('email:', email);
+    return {
+      code: CODE.BAD_REQUEST,
+      result: result
+    };
+  }
+
+  return {
+    code: CODE.OK,
+    result: {
+      status: 'ok'
+    },
+    extra: {
+      email: email,
+      key: params.key
+    }
+  };
+};
+
+
+var server = http.createServer(function(req, res) {
+  var ip = req.connection.remoteAddress;
+  var agent = req.headers['user-agent'];
+
+  console.log((++reqNumber).toString(), ip, getTime(),
+      req.method, req.url, agent);
 
   res.setHeader('Access-Control-Allow-Origin', config.origin);
   res.setHeader('Access-Control-Allow-Methods', 'POST');
 
-  if (!isValidEmail(email)) {
-    text = 'Email is not valid';
-    result = JSON.stringify({ status: 'error', message: text});
-    console.log(text);
-    res.writeHead(CODE.BAD_REQUEST, {'Content-Type': 'application/json'});
-    return res.end(result);
-  }
-
   if (req.method !== 'POST') {
-    text = 'POST method allowed only';
-    result = JSON.stringify({ status: 'error', message: text});
-    console.log(text);
+    var text = 'POST method allowed only';
+    var result = JSON.stringify({ status: 'error', message: text});
     res.writeHead(CODE.OK, {'Content-Type': 'application/json'});
     return res.end(result);
   }
 
-  processPost(req, res, function() {
-    var token = params.token || 'no_key';
-    handleRequest(res, token, email, req.post, ip);
+  getMultipartData(req, function(err, result) {
+    var checkResult = checkParameters(result.hash);
+
+    if (checkResult.status === 'error') {
+      makeResponse(res, checkResult);
+      return;
+    }
+
+    handleRequest(res, checkResult.extra.key, checkResult.extra.email,
+        result.file, ip);
   });
 
 });
