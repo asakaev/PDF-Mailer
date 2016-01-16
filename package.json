@@ -1,14 +1,33 @@
 {
-  "name": "PDF-Mailer",
-  "version": "2.0.0",
+  "name": "pdf-mailer",
+  "version": "2.1.0",
   "dependencies": {
     "atob": "^1.1.2",
     "busboy": "^0.2.12",
     "moment": "^2.10.6",
-    "nodemailer": "^1.4.0",
+    "nodemailer": "^1.11.0",
     "wkhtmltopdf": "^0.1.5"
   },
   "scripts": {
     "start": "node app.js"
-  }
+  },
+  "devDependencies": {
+    "gulp": "^3.9.0",
+    "gulp-concat": "^2.6.0"
+  },
+  "description": "pdf-mailer",
+  "main": "./bin/app.js",
+  "bin": {
+    "pdf-mailer": "app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tematema/PDF-Mailer.git"
+  },
+  "author": "Akhtyam Sakaev",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/tematema/PDF-Mailer/issues"
+  },
+  "homepage": "https://github.com/tematema/PDF-Mailer#readme"
 }
