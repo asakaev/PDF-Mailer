@@ -1,5 +1,15 @@
 # PDF-Mailer
 
+### Build:
+```
+gulp
+```
+
+### Run server:
+```
+node ./bin/app.js
+```
+
 ### API:
 ```
 POST multipart/form-data:
